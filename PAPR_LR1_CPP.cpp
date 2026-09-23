@@ -1,20 +1,217 @@
-// PAPR_LR1_CPP.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <vector>
+#include <chrono>
+#include <random>
+#include <cstdint>
+#include <limits>
+#include <functional>
+#include <windows.h>
+
+using namespace std;
+
+template<typename T>
+T** allocateArray(size_t n)
+{
+    T** arr = new T * [n];
+    for (size_t i = 0; i < n; ++i) {
+        arr[i] = new T[n];
+    }
+    return arr;
+}
+
+template<typename T>
+void freeArray(T** arr, size_t n)
+{
+    for (size_t i = 0; i < n; ++i) {
+        delete[] arr[i];
+    }
+    delete[] arr;
+}
+
+template<typename T>
+T** multiplyArrays(T** A, T** B, size_t n)
+{
+    T** result = allocateArray<T>(n);
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            T sum = 0;
+            for (size_t k = 0; k < n; ++k) {
+                sum += A[i][k] * B[k][j];
+            }
+            result[i][j] = sum;
+        }
+    }
+    return result;
+}
+
+template<typename T>
+T** generateRandomArray(size_t n, unsigned seed)
+{
+    T** values = allocateArray<T>(n);
+    mt19937 randomEngine(seed);
+    uniform_real_distribution<double> distribution(0.0, 9.0);
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            values[i][j] = static_cast<T>(distribution(randomEngine));
+        }
+    }
+    return values;
+}
+
+template<typename T>
+class Matrix
+{
+public:
+    explicit Matrix(size_t n) : n_(n), values_(n, vector<T>(n)) {}
+
+    T& at(size_t row, size_t col) { return values_[row][col]; }
+    const T& at(size_t row, size_t col) const { return values_[row][col]; }
+
+    Matrix<T> multiply(const Matrix<T>& other) const
+    {
+        Matrix<T> result(n_);
+        for (size_t i = 0; i < n_; ++i) {
+            for (size_t j = 0; j < n_; ++j) {
+                T sum = 0;
+                for (size_t k = 0; k < n_; ++k) {
+                    sum += at(i, k) * other.at(k, j);
+                }
+                result.at(i, j) = sum;
+            }
+        }
+        return result;
+    }
+
+private:
+    size_t n_;
+    vector<vector<T>> values_;
+};
+
+template<typename T>
+Matrix<T> generateRandomMatrix(size_t n, unsigned seed)
+{
+    Matrix<T> matrix(n);
+    mt19937 randomEngine(seed);
+    uniform_real_distribution<double> distribution(0.0, 9.0);
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            matrix.at(i, j) = static_cast<T>(distribution(randomEngine));
+        }
+    }
+    return matrix;
+}
+
+static double measureMinTime(const function<void()>& codeToMeasure, int repeats)
+{
+    double minTime = (numeric_limits<double>::max)();
+
+    for (int i = 0; i < repeats; ++i) {
+        auto start = chrono::high_resolution_clock::now();
+        codeToMeasure();
+        auto end = chrono::high_resolution_clock::now();
+
+        double elapsedSeconds = chrono::duration<double>(end - start).count();
+        if (elapsedSeconds < minTime) {
+            minTime = elapsedSeconds;
+        }
+    }
+    return minTime;
+}
+
+struct ComparisonResult {
+    double timeWithoutObjects;
+    double timeWithObjects;
+};
+
+template<typename T>
+ComparisonResult compareArrayVsObject(size_t n, int repeats)
+{
+    ComparisonResult result;
+
+    T** A = generateRandomArray<T>(n, 1);
+    T** B = generateRandomArray<T>(n, 2);
+
+    result.timeWithoutObjects = measureMinTime([&]() {
+        T** product = multiplyArrays(A, B, n);
+        freeArray(product, n);
+        }, repeats);
+
+    freeArray(A, n);
+    freeArray(B, n);
+
+    Matrix<T> matrixA = generateRandomMatrix<T>(n, 1);
+    Matrix<T> matrixB = generateRandomMatrix<T>(n, 2);
+
+    result.timeWithObjects = measureMinTime([&]() {
+        Matrix<T> product = matrixA.multiply(matrixB);
+        }, repeats);
+
+    return result;
+}
+
+static void runTask7(const vector<size_t>& sizes, int repeats)
+{
+    cout << "\n=== Завдання 7: множення матриць (double) ===\n";
+    cout << "n         без об'єктів (с)   з об'єктами (с)\n";
+
+    double previousTimeRaw = 0.0;
+    double previousTimeObj = 0.0;
+    size_t previousN = 0;
+
+    for (size_t n : sizes) {
+        ComparisonResult r = compareArrayVsObject<double>(n, repeats);
+
+        cout << n << "\t" << r.timeWithoutObjects << "\t" << r.timeWithObjects << "\n";
+
+        if (previousN != 0) {
+            double sizeRatio = static_cast<double>(n) / previousN;
+            double theoreticalRatio = sizeRatio * sizeRatio * sizeRatio;
+
+            cout << "    T(" << n << ") / T(" << previousN << "): "
+                << "без об'єктів = " << (r.timeWithoutObjects / previousTimeRaw)
+                << ", з об'єктами = " << (r.timeWithObjects / previousTimeObj)
+                << ", теоретично n^3 дає = " << theoreticalRatio
+                << "\n";
+        }
+
+        previousTimeRaw = r.timeWithoutObjects;
+        previousTimeObj = r.timeWithObjects;
+        previousN = n;
+    }
+}
+
+template<typename T>
+void printTypeRow(const char* typeName, size_t n, int repeats)
+{
+    ComparisonResult r = compareArrayVsObject<T>(n, repeats);
+    cout << typeName << "\t" << r.timeWithoutObjects << "\t" << r.timeWithObjects << "\n";
+}
+
+static void runTask9(size_t n, int repeats)
+{
+    cout << "\n=== Завдання 9: вплив типу даних, n = " << n << " ===\n";
+    cout << "Тип         без об'єктів (с)   з об'єктами (с)\n";
+
+    printTypeRow<int8_t>("int8_t", n, repeats);
+    printTypeRow<int16_t>("int16_t", n, repeats);
+    printTypeRow<int32_t>("int32_t", n, repeats);
+    printTypeRow<int64_t>("int64_t", n, repeats);
+    printTypeRow<float>("float", n, repeats);
+    printTypeRow<double>("double", n, repeats);
+}
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    const int repeats = 1;
+
+    runTask7({ 512, 1024, 2048 }, repeats);
+
+    runTask9(1024, repeats);
+
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
