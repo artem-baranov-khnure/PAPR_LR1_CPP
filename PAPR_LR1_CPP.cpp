@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <chrono>
 #include <random>
@@ -75,13 +76,13 @@ public:
         delete[] data_;
     }
 
-    T& at(size_t row, size_t col) 
-    { 
-        return data_[row * n_ + col]; 
+    T& at(size_t row, size_t col)
+    {
+        return data_[row * n_ + col];
     }
 
-    const T& at(size_t row, size_t col) const 
-    { 
+    const T& at(size_t row, size_t col) const
+    {
         return data_[row * n_ + col];
     }
 
@@ -167,48 +168,77 @@ ComparisonResult compareArrayVsObject(size_t n, int repeats)
     return result;
 }
 
+static const int COL_N = 10;
+static const int COL_TIME = 20;
+static const int COL_TYPE = 12;
+
+static void printSeparator(int totalWidth)
+{
+    cout << string(totalWidth, '-') << "\n";
+}
+
 static void runTask7(const vector<size_t>& sizes, int repeats)
 {
     cout << "\n=== Завдання 7: множення матриць (double) ===\n";
-    cout << "n         без об'єктів (с)   з об'єктами (с)\n";
+
+    printSeparator(COL_N + COL_TIME * 2);
+    cout << left << setw(COL_N) << "n"
+        << right << setw(COL_TIME) << "без об'єктів (с)"
+        << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
+    printSeparator(COL_N + COL_TIME * 2);
 
     double previousTimeRaw = 0.0;
     double previousTimeObj = 0.0;
     size_t previousN = 0;
 
+    cout << fixed << setprecision(6);
+
     for (size_t n : sizes) {
         ComparisonResult r = compareArrayVsObject<double>(n, repeats);
 
-        cout << n << "\t" << r.timeWithoutObjects << "\t" << r.timeWithObjects << "\n";
+        cout << left << setw(COL_N) << n
+            << right << setw(COL_TIME) << r.timeWithoutObjects
+            << right << setw(COL_TIME) << r.timeWithObjects << "\n";
 
         if (previousN != 0) {
             double sizeRatio = static_cast<double>(n) / previousN;
             double theoreticalRatio = sizeRatio * sizeRatio * sizeRatio;
 
-            cout << "    T(" << n << ") / T(" << previousN << "): "
+            cout << setprecision(3)
+                << "    T(" << n << ") / T(" << previousN << "): "
                 << "без об'єктів = " << (r.timeWithoutObjects / previousTimeRaw)
                 << ", з об'єктами = " << (r.timeWithObjects / previousTimeObj)
                 << ", теоретично n^3 дає = " << theoreticalRatio
                 << "\n";
+            cout << setprecision(6);
         }
 
         previousTimeRaw = r.timeWithoutObjects;
         previousTimeObj = r.timeWithObjects;
         previousN = n;
     }
+    printSeparator(COL_N + COL_TIME * 2);
 }
 
 template<typename T>
 void printTypeRow(const char* typeName, size_t n, int repeats)
 {
     ComparisonResult r = compareArrayVsObject<T>(n, repeats);
-    cout << typeName << "\t" << r.timeWithoutObjects << "\t" << r.timeWithObjects << "\n";
+    cout << fixed << setprecision(6)
+        << left << setw(COL_TYPE) << typeName
+        << right << setw(COL_TIME) << r.timeWithoutObjects
+        << right << setw(COL_TIME) << r.timeWithObjects << "\n";
 }
 
 static void runTask9(size_t n, int repeats)
 {
     cout << "\n=== Завдання 9: вплив типу даних, n = " << n << " ===\n";
-    cout << "Тип         без об'єктів (с)   з об'єктами (с)\n";
+
+    printSeparator(COL_TYPE + COL_TIME * 2);
+    cout << left << setw(COL_TYPE) << "Тип"
+        << right << setw(COL_TIME) << "без об'єктів (с)"
+        << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
+    printSeparator(COL_TYPE + COL_TIME * 2);
 
     printTypeRow<int8_t>("int8_t", n, repeats);
     printTypeRow<int16_t>("int16_t", n, repeats);
@@ -216,6 +246,8 @@ static void runTask9(size_t n, int repeats)
     printTypeRow<int64_t>("int64_t", n, repeats);
     printTypeRow<float>("float", n, repeats);
     printTypeRow<double>("double", n, repeats);
+
+    printSeparator(COL_TYPE + COL_TIME * 2);
 }
 
 int main()
