@@ -67,31 +67,31 @@ class Matrix
 public:
     Matrix(size_t n)
     {
-        n_ = n;
-        data_ = new T[n * n];
+        matrixSize = n;
+        matrixArray = new T[n * n];
     }
 
     ~Matrix()
     {
-        delete[] data_;
+        delete[] matrixArray;
     }
 
     T& at(size_t row, size_t col)
     {
-        return data_[row * n_ + col];
+        return matrixArray[row * matrixSize + col];
     }
 
     const T& at(size_t row, size_t col) const
     {
-        return data_[row * n_ + col];
+        return matrixArray[row * matrixSize + col];
     }
 
     void multiply(const Matrix<T>& other, Matrix<T>& result) const
     {
-        for (size_t i = 0; i < n_; ++i) {
-            for (size_t j = 0; j < n_; ++j) {
+        for (size_t i = 0; i < matrixSize; ++i) {
+            for (size_t j = 0; j < matrixSize; ++j) {
                 T sum = 0;
-                for (size_t k = 0; k < n_; ++k) {
+                for (size_t k = 0; k < matrixSize; ++k) {
                     sum += at(i, k) * other.at(k, j);
                 }
                 result.at(i, j) = sum;
@@ -100,8 +100,8 @@ public:
     }
 
 private:
-    size_t n_;
-    T* data_;
+    size_t matrixSize;
+    T* matrixArray;
 };
 
 template<typename T>
@@ -168,7 +168,7 @@ ComparisonResult compareArrayVsObject(size_t n, int repeats)
     return result;
 }
 
-static const int COL_N = 10;
+static const int COL_SIZE = 10;
 static const int COL_TIME = 20;
 static const int COL_TYPE = 12;
 
@@ -179,13 +179,13 @@ static void printSeparator(int totalWidth)
 
 static void runTask7(const vector<size_t>& sizes, int repeats)
 {
-    cout << "\n=== Завдання 7: множення матриць (double) ===\n";
+    cout << "\n--- Завдання 7: множення матриць (double) ---\n";
 
-    printSeparator(COL_N + COL_TIME * 2);
-    cout << left << setw(COL_N) << "n"
+    printSeparator(COL_SIZE + COL_TIME * 2);
+    cout << left << setw(COL_SIZE) << "Розмір"
         << right << setw(COL_TIME) << "без об'єктів (с)"
         << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
-    printSeparator(COL_N + COL_TIME * 2);
+    printSeparator(COL_SIZE + COL_TIME * 2);
 
     double previousTimeRaw = 0.0;
     double previousTimeObj = 0.0;
@@ -196,7 +196,7 @@ static void runTask7(const vector<size_t>& sizes, int repeats)
     for (size_t n : sizes) {
         ComparisonResult r = compareArrayVsObject<double>(n, repeats);
 
-        cout << left << setw(COL_N) << n
+        cout << left << setw(COL_SIZE) << n
             << right << setw(COL_TIME) << r.timeWithoutObjects
             << right << setw(COL_TIME) << r.timeWithObjects << "\n";
 
@@ -205,7 +205,7 @@ static void runTask7(const vector<size_t>& sizes, int repeats)
             double theoreticalRatio = sizeRatio * sizeRatio * sizeRatio;
 
             cout << setprecision(3)
-                << "    T(" << n << ") / T(" << previousN << "): "
+                << "--- T(" << n << ") / T(" << previousN << "): "
                 << "без об'єктів = " << (r.timeWithoutObjects / previousTimeRaw)
                 << ", з об'єктами = " << (r.timeWithObjects / previousTimeObj)
                 << ", теоретично n^3 дає = " << theoreticalRatio
@@ -217,11 +217,11 @@ static void runTask7(const vector<size_t>& sizes, int repeats)
         previousTimeObj = r.timeWithObjects;
         previousN = n;
     }
-    printSeparator(COL_N + COL_TIME * 2);
+    printSeparator(COL_SIZE + COL_TIME * 2);
 }
 
 template<typename T>
-void printTypeRow(const char* typeName, size_t n, int repeats)
+void printTypeTestResult(const char* typeName, size_t n, int repeats)
 {
     ComparisonResult r = compareArrayVsObject<T>(n, repeats);
     cout << fixed << setprecision(6)
@@ -232,7 +232,7 @@ void printTypeRow(const char* typeName, size_t n, int repeats)
 
 static void runTask9(size_t n, int repeats)
 {
-    cout << "\n=== Завдання 9: вплив типу даних, n = " << n << " ===\n";
+    cout << "\n--- Завдання 9: вплив типу даних, n = " << n << " ---\n";
 
     printSeparator(COL_TYPE + COL_TIME * 2);
     cout << left << setw(COL_TYPE) << "Тип"
@@ -240,12 +240,12 @@ static void runTask9(size_t n, int repeats)
         << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
     printSeparator(COL_TYPE + COL_TIME * 2);
 
-    printTypeRow<int8_t>("int8_t", n, repeats);
-    printTypeRow<int16_t>("int16_t", n, repeats);
-    printTypeRow<int32_t>("int32_t", n, repeats);
-    printTypeRow<int64_t>("int64_t", n, repeats);
-    printTypeRow<float>("float", n, repeats);
-    printTypeRow<double>("double", n, repeats);
+    printTypeTestResult<int8_t>("int8_t", n, repeats);
+    printTypeTestResult<int16_t>("int16_t", n, repeats);
+    printTypeTestResult<int32_t>("int32_t", n, repeats);
+    printTypeTestResult<int64_t>("int64_t", n, repeats);
+    printTypeTestResult<float>("float", n, repeats);
+    printTypeTestResult<double>("double", n, repeats);
 
     printSeparator(COL_TYPE + COL_TIME * 2);
 }
