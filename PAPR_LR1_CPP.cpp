@@ -64,14 +64,29 @@ template<typename T>
 class Matrix
 {
 public:
-    explicit Matrix(size_t n) : n_(n), values_(n, vector<T>(n)) {}
-
-    T& at(size_t row, size_t col) { return values_[row][col]; }
-    const T& at(size_t row, size_t col) const { return values_[row][col]; }
-
-    Matrix<T> multiply(const Matrix<T>& other) const
+    Matrix(size_t n)
     {
-        Matrix<T> result(n_);
+        n_ = n;
+        data_ = new T[n * n];
+    }
+
+    ~Matrix()
+    {
+        delete[] data_;
+    }
+
+    T& at(size_t row, size_t col) 
+    { 
+        return data_[row * n_ + col]; 
+    }
+
+    const T& at(size_t row, size_t col) const 
+    { 
+        return data_[row * n_ + col];
+    }
+
+    void multiply(const Matrix<T>& other, Matrix<T>& result) const
+    {
         for (size_t i = 0; i < n_; ++i) {
             for (size_t j = 0; j < n_; ++j) {
                 T sum = 0;
@@ -81,18 +96,16 @@ public:
                 result.at(i, j) = sum;
             }
         }
-        return result;
     }
 
 private:
     size_t n_;
-    vector<vector<T>> values_;
+    T* data_;
 };
 
 template<typename T>
-Matrix<T> generateRandomMatrix(size_t n, unsigned seed)
+void fillRandomMatrix(Matrix<T>& matrix, size_t n, unsigned seed)
 {
-    Matrix<T> matrix(n);
     mt19937 randomEngine(seed);
     uniform_real_distribution<double> distribution(0.0, 9.0);
 
@@ -101,7 +114,6 @@ Matrix<T> generateRandomMatrix(size_t n, unsigned seed)
             matrix.at(i, j) = static_cast<T>(distribution(randomEngine));
         }
     }
-    return matrix;
 }
 
 static double measureMinTime(const function<void()>& codeToMeasure, int repeats)
@@ -142,11 +154,14 @@ ComparisonResult compareArrayVsObject(size_t n, int repeats)
     freeArray(A, n);
     freeArray(B, n);
 
-    Matrix<T> matrixA = generateRandomMatrix<T>(n, 1);
-    Matrix<T> matrixB = generateRandomMatrix<T>(n, 2);
+    Matrix<T> matrixA(n);
+    fillRandomMatrix(matrixA, n, 1);
+    Matrix<T> matrixB(n);
+    fillRandomMatrix(matrixB, n, 2);
 
     result.timeWithObjects = measureMinTime([&]() {
-        Matrix<T> product = matrixA.multiply(matrixB);
+        Matrix<T> product(n);
+        matrixA.multiply(matrixB, product);
         }, repeats);
 
     return result;
