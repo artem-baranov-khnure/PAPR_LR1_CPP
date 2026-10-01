@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <iomanip>
 #include <cstdint>
 #include <cstdlib>
@@ -7,6 +7,7 @@
 #include <chrono>
 #include <intrin.h>
 #include <ctime>
+#include "TasksPartTwo.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -240,8 +241,10 @@ int main()
     // https://en.cppreference.com/cpp/io/manip/setprecision
     cout << fixed << setprecision(9);
 
+    const char* separator = "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=";
 
-    cout << "Task 1 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
+
+    cout << "Task 1 " << separator << endl;
 
     int32_t max_time = 0x7FFFFFFF;
     int32_t overflow_time = max_time + 1;
@@ -275,7 +278,7 @@ int main()
 
 
     cout << "\n\n\n" << endl;
-    cout << "Task 2 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
+    cout << "Task 2 " << separator << endl;
 
     cout << "time                   : " << GetMinAccuracy(GetAccuracyTime) << " s\n";
     cout << "clock                  : " << GetMinAccuracy(GetAccuracyClock) << " s\n";
@@ -290,7 +293,7 @@ int main()
 
 
     cout << "\n\n\n" << endl;
-    cout << "Task 3 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
+    cout << "Task 3 " << separator << endl;
 
     const size_t arr_size = 1000;
     int* arr = new int[arr_size];
@@ -336,7 +339,7 @@ int main()
 
 
     cout << "\n\n\n" << endl;
-    cout << "Task 4 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=" << endl;
+    cout << "Task 4 " << separator << endl;
 
 
     const size_t arr_sizes[3] = { 100000, 200000, 300000 };
@@ -397,6 +400,15 @@ int main()
 
     cout << "\n\n\n" << endl;
 
+    //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+    const int repeats = 1;
+
+    cout << "Task 7 " << separator << endl;
+    runTask7({ 512, 1024, 2048 }, repeats);
+
+    cout << "Task 9 " << separator << endl;
+    runTask9(1024, repeats);
 
     system("pause");
     return 0;
