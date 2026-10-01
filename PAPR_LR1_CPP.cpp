@@ -404,11 +404,13 @@ int main()
 
     const int repeats = 1;
 
-    cout << "Task 7 " << separator << endl;
+    cout << "Task 7 " << separator << endl << endl;
     runTask7({ 512, 1024, 2048 }, repeats);
+    cout << "\n\n\n" << endl;
 
-    cout << "Task 9 " << separator << endl;
+    cout << "Task 9 " << separator << endl << endl;
     runTask9(1024, repeats);
+    cout << "\n\n\n" << endl;
 
     system("pause");
     return 0;

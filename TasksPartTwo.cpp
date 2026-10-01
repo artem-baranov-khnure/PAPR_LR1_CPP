@@ -182,12 +182,10 @@ namespace Part2
 
     static void printTask7(const vector<size_t>& sizes, int repeats)
     {
-        cout << "\n--- Завдання 7: множення матриць (double) ---\n";
-
         printSeparator(COL_SIZE + COL_TIME * 2);
-        cout << left << setw(COL_SIZE) << "Розмір"
-            << right << setw(COL_TIME) << "без об'єктів (с)"
-            << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
+        cout << left << setw(COL_SIZE) << "Size"
+            << right << setw(COL_TIME) << "without objects (s)"
+            << right << setw(COL_TIME) << "with objects (s)" << "\n";
         printSeparator(COL_SIZE + COL_TIME * 2);
 
         double previousTimeRaw = 0.0;
@@ -208,10 +206,10 @@ namespace Part2
                 double theoreticalRatio = sizeRatio * sizeRatio * sizeRatio;
 
                 cout << setprecision(3)
-                    << "--- T(" << n << ") / T(" << previousN << "): "
-                    << "без об'єктів = " << (r.timeWithoutObjects / previousTimeRaw)
-                    << ", з об'єктами = " << (r.timeWithObjects / previousTimeObj)
-                    << ", теоретично n^3 дає = " << theoreticalRatio
+                    << "    T(" << n << ") / T(" << previousN << "): "
+                    << "without objects = " << (r.timeWithoutObjects / previousTimeRaw)
+                    << ", with objects = " << (r.timeWithObjects / previousTimeObj)
+                    << ", theoretically n^3 = " << theoreticalRatio
                     << "\n";
                 cout << setprecision(6);
             }
@@ -235,12 +233,10 @@ namespace Part2
 
     static void printTask9(size_t n, int repeats)
     {
-        cout << "\n--- Завдання 9: вплив типу даних, n = " << n << " ---\n";
-
         printSeparator(COL_TYPE + COL_TIME * 2);
-        cout << left << setw(COL_TYPE) << "Тип"
-            << right << setw(COL_TIME) << "без об'єктів (с)"
-            << right << setw(COL_TIME) << "з об'єктами (с)" << "\n";
+        cout << left << setw(COL_TYPE) << "Type"
+            << right << setw(COL_TIME) << "without objects (s)"
+            << right << setw(COL_TIME) << "with objects (s)" << "\n";
         printSeparator(COL_TYPE + COL_TIME * 2);
 
         printTypeTestResult<int8_t>("int8_t", n, repeats);
